@@ -3,8 +3,6 @@ import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { FavoritesView } from './components/FavoritesView';
 import { Tender } from './types';
-import './src/index.css';
-
 
 // Simple state-based router
 type View = 'dashboard' | 'favorites';

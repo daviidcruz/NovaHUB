@@ -143,6 +143,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite,
       return new Date(tenderDate).getTime() > new Date(lastViewedDate).getTime();
   };
 
+  // Calculate unread count (based on unfiltered list to be accurate about "New" arrivals)
+  const unreadCount = tenders.filter(t => isNewTender(t.updated)).length;
+
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -156,15 +159,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite,
             <p className="text-gray-600 dark:text-gray-400">Explora las últimas oportunidades del sector público.</p>
         </div>
         
-        {/* Refresh Button */}
-        <button 
-            onClick={handleRefresh}
-            disabled={refreshing || loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50 font-medium text-sm"
-        >
-            <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
-            {refreshing ? 'Actualizando...' : 'Actualizar'}
-        </button>
+        <div className="flex items-center gap-4">
+            {/* Unread Counter Badge */}
+            {unreadCount > 0 && (
+                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-300 hidden sm:inline-block">
+                        Licitaciones sin leer
+                    </span>
+                    <span className="flex items-center justify-center bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[24px] h-6 shadow-md ring-2 ring-white dark:ring-slate-900">
+                        {unreadCount}
+                    </span>
+                </div>
+            )}
+
+            {/* Refresh Button */}
+            <button 
+                onClick={handleRefresh}
+                disabled={refreshing || loading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50 font-medium text-sm"
+            >
+                <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+                {refreshing ? 'Actualizando...' : 'Actualizar'}
+            </button>
+        </div>
       </div>
 
       {/* Controls Container */}
