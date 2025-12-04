@@ -152,7 +152,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite,
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Paneel de Licitaciones</h2>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Panel de Licitaciones</h2>
             <p className="text-gray-600 dark:text-gray-400">Explora las últimas oportunidades del sector público.</p>
         </div>
         
