@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NovaHUB</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script type="importmap">
 {
@@ -17,13 +16,9 @@
   }
 }
 </script>
-<script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-</script>
 </head>
   <body class="bg-gray-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-200">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
