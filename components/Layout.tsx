@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
-import { Menu, X, LayoutDashboard, Bookmark, Settings, Moon, Sun, Sparkles, Tag, Plus, RotateCcw } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Bookmark, Settings, Moon, Sun, Sparkles, Tag, Plus, RotateCcw, Monitor } from 'lucide-react';
+import { ThemeMode } from '../App';
 
 interface LayoutProps {
   children: React.ReactNode;
   currentView: 'dashboard' | 'favorites';
   onViewChange: (view: 'dashboard' | 'favorites') => void;
-  isDarkMode: boolean;
-  toggleTheme: () => void;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
   isAIEnabled: boolean;
   toggleAI: () => void;
   keywords: string[];
@@ -20,8 +21,8 @@ export const Layout: React.FC<LayoutProps> = ({
     children, 
     currentView, 
     onViewChange,
-    isDarkMode,
-    toggleTheme,
+    themeMode,
+    setThemeMode,
     isAIEnabled,
     toggleAI,
     keywords,
@@ -92,20 +93,35 @@ export const Layout: React.FC<LayoutProps> = ({
              {/* Popup Menu */}
              {isSettingsOpen && (
                 <div className="absolute bottom-full left-0 w-full px-4 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-2 space-y-1">
-                        {/* Theme Toggle */}
-                        <button 
-                            onClick={toggleTheme}
-                            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-sm text-gray-700 dark:text-gray-300"
-                        >
-                            <div className="flex items-center gap-3">
-                                {isDarkMode ? <Moon size={18} /> : <Sun size={18} />}
-                                <span>Tema {isDarkMode ? 'Oscuro' : 'Claro'}</span>
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 space-y-3">
+                        
+                        {/* Theme Selection */}
+                        <div className="space-y-1">
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-1">Tema</span>
+                            <div className="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-1">
+                                <button 
+                                    onClick={() => setThemeMode('light')}
+                                    className={`flex-1 flex items-center justify-center p-1.5 rounded-md text-sm transition-all ${themeMode === 'light' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                                    title="Claro"
+                                >
+                                    <Sun size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setThemeMode('dark')}
+                                    className={`flex-1 flex items-center justify-center p-1.5 rounded-md text-sm transition-all ${themeMode === 'dark' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                                    title="Oscuro"
+                                >
+                                    <Moon size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setThemeMode('system')}
+                                    className={`flex-1 flex items-center justify-center p-1.5 rounded-md text-sm transition-all ${themeMode === 'system' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                                    title="Sistema"
+                                >
+                                    <Monitor size={16} />
+                                </button>
                             </div>
-                            <div className={`w-8 h-4 rounded-full relative transition-colors ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                                <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${isDarkMode ? 'left-4.5 translate-x-4' : 'left-0.5'}`}></div>
-                            </div>
-                        </button>
+                        </div>
 
                         {/* AI Toggle */}
                         <button 

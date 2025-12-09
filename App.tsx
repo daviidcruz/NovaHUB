@@ -8,6 +8,7 @@ import { DEFAULT_KEYWORDS } from './constants';
 
 // Simple state-based router
 type View = 'dashboard' | 'favorites';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -35,14 +36,20 @@ const App: React.FC = () => {
   // Derived Set for fast O(1) lookups in Dashboard
   const favoriteIds = useMemo(() => new Set(favorites.map(t => t.id)), [favorites]);
 
-  // Initialize Theme
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+  // Initialize Theme (Light, Dark, or System)
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('novaHubTheme');
-        if (saved) return saved === 'dark';
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem('novaHubThemeMode');
+        // Validate saved value
+        if (saved === 'light' || saved === 'dark' || saved === 'system') {
+            return saved;
+        }
+        // Legacy support: if previously just 'dark' in generic theme key
+        const legacy = localStorage.getItem('novaHubTheme');
+        if (legacy === 'dark') return 'dark';
+        if (legacy === 'light') return 'light';
     }
-    return false;
+    return 'system';
   });
 
   // Initialize AI Enabled State (Default OFF)
@@ -65,26 +72,33 @@ const App: React.FC = () => {
 
   // Apply Theme Effect
   useEffect(() => {
-    if (isDarkMode) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('novaHubTheme', 'dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('novaHubTheme', 'light');
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+        if (themeMode === 'dark') {
+            root.classList.add('dark');
+        } else if (themeMode === 'light') {
+            root.classList.remove('dark');
+        } else if (themeMode === 'system') {
+            if (mediaQuery.matches) {
+                root.classList.add('dark');
+            } else {
+                root.classList.remove('dark');
+            }
+        }
+    };
+
+    applyTheme();
+    localStorage.setItem('novaHubThemeMode', themeMode);
+
+    // Listen for system changes if mode is system
+    if (themeMode === 'system') {
+        mediaQuery.addEventListener('change', applyTheme);
+        return () => mediaQuery.removeEventListener('change', applyTheme);
     }
-  }, [isDarkMode]);
+  }, [themeMode]);
 
-  // Persist AI Setting
-  useEffect(() => {
-    localStorage.setItem('novaHubAIEnabled', String(isAIEnabled));
-  }, [isAIEnabled]);
-
-  // Persist Keywords
-  useEffect(() => {
-    localStorage.setItem('novaHubKeywords', JSON.stringify(customKeywords));
-  }, [customKeywords]);
-
-  const toggleTheme = () => setIsDarkMode(prev => !prev);
   const toggleAI = () => setIsAIEnabled(prev => !prev);
 
   const addKeyword = (keyword: string) => {
@@ -118,12 +132,15 @@ const App: React.FC = () => {
     });
   };
 
+  // Determine if actually dark for rendering logic (passing props) if needed, 
+  // though CSS classes handle most. We can pass the mode directly.
+
   return (
     <Layout 
         currentView={currentView} 
         onViewChange={setCurrentView}
-        isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
+        themeMode={themeMode}
+        setThemeMode={setThemeMode}
         isAIEnabled={isAIEnabled}
         toggleAI={toggleAI}
         keywords={customKeywords}

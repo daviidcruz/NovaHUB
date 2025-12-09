@@ -1,14 +1,25 @@
 
 import { Tender } from '../types';
 
-// Helper to check keywords in real data
+// Helper to remove accents and lowercase text for flexible matching
+const normalizeString = (str: string): string => {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+};
+
+// Helper to check keywords in real data (Accent and Case Insensitive)
 const findKeywords = (text: string, keywordsList: string[]): string[] => {
-  const lowerText = text.toLowerCase();
+  const normalizedText = normalizeString(text);
+  
   // Filter unique matches
   const matches = new Set<string>();
   keywordsList.forEach(k => {
-    if (lowerText.includes(k.toLowerCase())) {
-        matches.add(k);
+    // Normalize the keyword too (e.g. "Tecnología" -> "tecnologia")
+    const normalizedKeyword = normalizeString(k);
+    if (normalizedText.includes(normalizedKeyword)) {
+        matches.add(k); // Return the original formatted keyword
     }
   });
   return Array.from(matches);
