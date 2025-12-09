@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { fetchTenders } from '../services/tenderService';
 import { Tender } from '../types';
@@ -8,12 +9,13 @@ interface DashboardProps {
   favorites: Set<string>;
   toggleFavorite: (tender: Tender) => void;
   isAIEnabled: boolean;
+  keywords: string[];
 }
 
 type SortOption = 'newest' | 'oldest' | 'highest_budget' | 'lowest_budget';
 type SourceFilter = 'all' | 'Perfiles Contratante' | 'Plataformas Agregadas' | 'Contratos Menores';
 
-export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite, isAIEnabled }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite, isAIEnabled, keywords }) => {
   const [tenders, setTenders] = useState<Tender[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,7 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite,
     else setLoading(true);
 
     try {
-      const data = await fetchTenders();
+      const data = await fetchTenders(keywords);
       setTenders(data);
 
       // SILENT UPDATE: Update localStorage with the newest date found.
@@ -68,9 +70,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ favorites, toggleFavorite,
     }
   };
 
+  // Re-load data if keywords change substantially to re-calculate keyword matches
+  // We use the length to avoid excessive re-renders, but ideally should deep check or manual refresh.
+  // For simplicity, we just trigger it.
   useEffect(() => {
     loadData();
-  }, []);
+  }, [keywords.length]); // Simple dependency check
 
   const handleRefresh = async () => {
     // When manual refreshing:

@@ -1,13 +1,12 @@
 
 import { Tender } from '../types';
-import { FLATTENED_KEYWORDS } from '../constants';
 
 // Helper to check keywords in real data
-const findKeywords = (text: string): string[] => {
+const findKeywords = (text: string, keywordsList: string[]): string[] => {
   const lowerText = text.toLowerCase();
   // Filter unique matches
   const matches = new Set<string>();
-  FLATTENED_KEYWORDS.forEach(k => {
+  keywordsList.forEach(k => {
     if (lowerText.includes(k.toLowerCase())) {
         matches.add(k);
     }
@@ -153,14 +152,14 @@ const fetchFeedContent = async (targetUrl: string): Promise<string | null> => {
     return null;
 };
 
-export const fetchTenders = async (): Promise<Tender[]> => {
+export const fetchTenders = async (keywords: string[]): Promise<Tender[]> => {
   const allTenders: Tender[] = [];
 
   const promises = FEED_CONFIG.map(async (feed) => {
     try {
         const xmlContent = await fetchFeedContent(feed.url);
         if (xmlContent && xmlContent.trim().startsWith("<")) {
-            return parseAtomFeed(xmlContent, feed.sourceType);
+            return parseAtomFeed(xmlContent, feed.sourceType, keywords);
         }
     } catch (error) {
         console.error(`Error processing feed ${feed.sourceType}:`, error);
@@ -178,7 +177,7 @@ export const fetchTenders = async (): Promise<Tender[]> => {
   return allTenders.sort((a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime());
 };
 
-export const parseAtomFeed = (xmlString: string, sourceType: string): Tender[] => {
+export const parseAtomFeed = (xmlString: string, sourceType: string, keywordsList: string[]): Tender[] => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, "text/xml");
   const entries = xmlDoc.getElementsByTagName("entry");
@@ -206,7 +205,7 @@ export const parseAtomFeed = (xmlString: string, sourceType: string): Tender[] =
     const id = entry.getElementsByTagName("id")[0]?.textContent || `gen-${Math.random()}`;
 
     const fullText = `${title} ${summary} ${organism || ''}`;
-    const keywords = findKeywords(fullText);
+    const keywords = findKeywords(fullText, keywordsList);
 
     let contractType = "Otros";
     if (fullText.toLowerCase().includes("servicios")) contractType = "Servicios";

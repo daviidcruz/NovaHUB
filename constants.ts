@@ -29,7 +29,7 @@ export const NOVAGOB_KEYWORDS: KeywordCategory[] = [
   }
 ];
 
-export const FLATTENED_KEYWORDS = NOVAGOB_KEYWORDS.flatMap(k => k.keywords);
+export const DEFAULT_KEYWORDS = NOVAGOB_KEYWORDS.flatMap(k => k.keywords);
 
 // Placeholder for generic images if generation fails
 export const PLACEHOLDER_IMAGE = "https://picsum.photos/800/600";

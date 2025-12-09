@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { FavoritesView } from './components/FavoritesView';
 import { Tender } from './types';
+import { DEFAULT_KEYWORDS } from './constants';
 
 // Simple state-based router
 type View = 'dashboard' | 'favorites';
@@ -52,6 +54,15 @@ const App: React.FC = () => {
     return false;
   });
 
+  // Initialize Custom Keywords
+  const [customKeywords, setCustomKeywords] = useState<string[]>(() => {
+      if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('novaHubKeywords');
+          if (saved) return JSON.parse(saved);
+      }
+      return DEFAULT_KEYWORDS;
+  });
+
   // Apply Theme Effect
   useEffect(() => {
     if (isDarkMode) {
@@ -68,8 +79,28 @@ const App: React.FC = () => {
     localStorage.setItem('novaHubAIEnabled', String(isAIEnabled));
   }, [isAIEnabled]);
 
+  // Persist Keywords
+  useEffect(() => {
+    localStorage.setItem('novaHubKeywords', JSON.stringify(customKeywords));
+  }, [customKeywords]);
+
   const toggleTheme = () => setIsDarkMode(prev => !prev);
   const toggleAI = () => setIsAIEnabled(prev => !prev);
+
+  const addKeyword = (keyword: string) => {
+      const trimmed = keyword.trim();
+      if (trimmed && !customKeywords.includes(trimmed)) {
+          setCustomKeywords(prev => [...prev, trimmed]);
+      }
+  };
+
+  const removeKeyword = (keyword: string) => {
+      setCustomKeywords(prev => prev.filter(k => k !== keyword));
+  };
+
+  const resetKeywords = () => {
+      setCustomKeywords(DEFAULT_KEYWORDS);
+  };
 
   // Persist to local storage whenever favorites change
   useEffect(() => {
@@ -95,12 +126,17 @@ const App: React.FC = () => {
         toggleTheme={toggleTheme}
         isAIEnabled={isAIEnabled}
         toggleAI={toggleAI}
+        keywords={customKeywords}
+        onAddKeyword={addKeyword}
+        onRemoveKeyword={removeKeyword}
+        onResetKeywords={resetKeywords}
     >
       {currentView === 'dashboard' && (
         <Dashboard 
           favorites={favoriteIds} 
           toggleFavorite={toggleFavorite} 
           isAIEnabled={isAIEnabled}
+          keywords={customKeywords}
         />
       )}
       {currentView === 'favorites' && (
